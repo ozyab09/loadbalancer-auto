@@ -64,3 +64,31 @@ check: `ansible -i inventory docker -a "free"`
 sudo apt install python-pip
 sudo pip install docker-py
 
+# aws
+ansible-playbook deploy/route53.yml -vv
+http://me-test.${domain}
+
+# nginx deploy
+ansible-playbook tracefik/deploy_nginx.yml 
+
+# etcd
+run: cd etc & docker-compose up -d
+
+check:
+curl 172.20.0.4:2379/version
+put the message:
+```
+curl http://172.20.0.4:2379/v2/keys/message -XPUT -d value="Hello world"
+{"action":"set","node":{"key":"/message","value":"Hello world","modifiedIndex":8,"createdIndex":8}}
+```
+get the message:
+```
+curl http://172.20.0.4:2379/v2/keys/message
+{"action":"get","node":{"key":"/message","value":"Hello world","modifiedIndex":8,"createdIndex":8}}
+```
+
+full version: https://coreos.com/etcd/docs/latest/v2/api.html
+
+
+# monitoring
+swarmprom

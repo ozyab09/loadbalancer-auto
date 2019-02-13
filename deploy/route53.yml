@@ -1,0 +1,23 @@
+---
+- name: Checking DNS Records
+  hosts: docker-host
+  gather_facts: no
+
+  tasks:
+    - name: Creating zone
+      route53:
+        state: present
+        zone: "{{ domain }}"
+        record: "{{ item }}"
+        hosted_zone_id: "{{ hosted_zone_id }}"
+        type: A
+        ttl: 1440
+        value: "{{ external_ip }}"
+        wait: yes
+        aws_access_key: "{{ aws_access_key }}"
+        secret_key: "{{ secret_key }}"
+        #region: us-east-1
+      with_items: "{{ subdomains }}"
+
+
+
