@@ -92,3 +92,36 @@ full version: https://coreos.com/etcd/docs/latest/v2/api.html
 
 # monitoring
 swarmprom
+
+# Сервисная учестная запись google
+https://console.cloud.google.com/apis/credentials/serviceaccountkey
+![Monitoring Pipeline](images/img-01.png)
+
+
+
+# Starting project
+docker-compose -f 1_compose-etcd.yml up -d
+docker-compose -f 2_compose-loadbalancer.yml up -d
+docker-compose -f 3_compose-demoapp.yml  up -d
+
+
+Преимущества:
+    1. Использование traefik для доступа к сервисам с автоматическим получением сертификатов SSL
+    2. Использование в проекте docker swarm является и плюсом и минусом одновременно
+    3. Примененное приложение sockshop в лучших традициях показывает что такое микросервис
+    4. Решение использовать swarmprom достаточно логичное
+    5. Управление route53 от AWS при помощи ansible
+
+Рекомендации:
+    1. Постараться разработать и добавить свои метрики и визуализировать их в grafana
+    2. Разработать CI\CD
+    3. Доработать систему разворота окружения
+    4. Внедрить систему логирования
+    5. Доработать документацию
+
+
+
+
+ЧТО СДЕЛАНО
+изменен домен на ozyab.tk
+управление доменом изменено с route53 на google cloud DNS

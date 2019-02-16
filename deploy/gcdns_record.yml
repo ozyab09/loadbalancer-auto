@@ -1,0 +1,35 @@
+---
+- name: Creating DNS Records
+  hosts: docker-host
+  gather_facts: no
+
+  tasks:
+  - name: Install Pip Dependencies
+    pip: 
+      name:
+        - apache-libcloud
+        - pycrypto
+
+  - name: Copy Credention File
+    copy:
+      src: "{{ credentials_file }}"
+      dest: ~/{{ credentials_file }}
+
+  - name: Creating DNS records
+    gcdns_record:
+      record: "{{ item }}"
+      zone_id: "{{ domain }}"
+      type: A
+      record_data: "{{ external_ip }}"
+      project_id: "{{ project_id }}"
+      credentials_file: "{{ credentials_file }}"
+      service_account_email: "{{ service_account_email }}"
+    with_items: "{{ subdomains }}"  
+
+  - name:  Delete File In A Remote Server
+    file:
+      path: ~/{{ credentials_file }}
+      state: absent
+
+
+

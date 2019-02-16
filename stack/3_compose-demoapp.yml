@@ -10,7 +10,7 @@ services:
     read_only: true
     labels:
       - "traefik.enable=true"
-      - "traefik.basic.frontend.rule=Host:shop.rfimoney.ru"
+      - "traefik.basic.frontend.rule=Host:${DEMOAPP_ENDPOINT}"
       - "traefik.basic.port=8079"
       - "traefik.basic.protocol=http"    
   #edge-router:
