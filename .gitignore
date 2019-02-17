@@ -1,4 +1,7 @@
-group_vars/
-inventory
-stack/.env
-deploy/gcp-service-account.json
+*.tfstate
+*.tfstate.*.backup
+*.tfstate.backup
+*.tfvars
+.terraform/
+*/gcp-service-account.json
+*/.env

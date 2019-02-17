@@ -1,0 +1,34 @@
+---
+- name: Creating DNS Records
+  hosts: hosts
+  connection: local
+  gather_facts: yes
+
+
+
+  tasks:
+    - name: Include vars of terraform_inventory file
+      include_vars:
+        file: terraform_inventory
+
+
+
+    - name: Install Pip Dependencies
+      pip: 
+       name:
+         - apache-libcloud
+         - pycrypto
+
+    - name: Creating DNS records
+      gcdns_record:
+        record: "{{ item }}"
+        zone_id: "{{ domain }}"
+        type: A
+        record_data: "{{ external_ip }}"
+        project_id: "{{ project_id }}"
+        credentials_file: "{{ credentials_file }}"
+        service_account_email: "{{ service_account_email }}"
+        overwrite: true
+      with_items: "{{ subdomains }}"
+
+

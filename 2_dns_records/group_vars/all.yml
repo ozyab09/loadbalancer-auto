@@ -1,0 +1,23 @@
+---
+# main
+
+domain: ozyab
+
+subdomains:
+  - shop.ozyab.tk
+  - grafana.ozyab.tk
+  - alertmanager.ozyab.tk
+  - unsee.ozyab.tk
+  - prometheus.ozyab.tk
+
+project_id: keen-phalanx-223413
+credentials_file: gcp-service-account.json
+service_account_email: dns-administrator@keen-phalanx-223413.iam.gserviceaccount.com
+
+# traefik
+user_email: 692677@mail.ru
+
+# Grafana
+ADMIN_USER: adminme
+ADMIN_PASSWORD: passwordme
+

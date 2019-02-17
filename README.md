@@ -1,3 +1,12 @@
+# How to run
+1
+terraform apply -auto-approve
+echo "external_ip:" > ../2_dns_records/terraform_inventory
+terraform output | grep wrk-ext | awk '{print "  - " $3}'  >> ../2_dns_records/terraform_inventory
+
+2
+ansible-playbook -D gcdns_record.yml -v
+
 # проект
 export GOOGLE_PROJECT=keen-phalanx-223413
 
@@ -103,6 +112,19 @@ https://console.cloud.google.com/apis/credentials/serviceaccountkey
 docker-compose -f 1_compose-etcd.yml up -d
 docker-compose -f 2_compose-loadbalancer.yml up -d
 docker-compose -f 3_compose-demoapp.yml  up -d
+
+
+# Terraform
+terraform apply -auto-approve
+terraform output
+
+# Dynamic inventory
+pip install pycrypto
+cd gce
+mkdir -p ~/.ansible/tmp
+chmod +x gce.py
+GCE_INI_PATH=~$(pwd)/gce.ini ./gce.py --list
+
 
 
 Преимущества:
