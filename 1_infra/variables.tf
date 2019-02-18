@@ -26,6 +26,11 @@ variable ssh_key_private {
   description = "Path to private key"
 }
 
+# Gitlab CI Token
+variable gitlab_token {
+  description = "Token for Gitlab CI"
+}
+
 # Network
 variable network {
   description = "CGP Network for Project"

@@ -2,6 +2,7 @@
 resource "google_compute_address" "swarm-mng-ext" {
   name = "swarm-mng-ext"
 }
+
 resource "google_compute_address" "swarm-wrk-ext-01" {
   name = "swarm-mng-ext-01"
 }
@@ -17,6 +18,7 @@ resource "google_compute_address" "swarm-mng-int" {
   address      = "${var.mng_int_ip}"
   region       = "${var.mng_int_ip_region}"
 }
+
 resource "google_compute_address" "swarm-wrk-int-01" {
   name         = "swarm-wrk-int-01"
   address_type = "INTERNAL"

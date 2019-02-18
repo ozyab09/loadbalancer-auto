@@ -125,7 +125,23 @@ mkdir -p ~/.ansible/tmp
 chmod +x gce.py
 GCE_INI_PATH=~$(pwd)/gce.ini ./gce.py --list
 
+# узанть свой внешний IP
+curl 169.254.169.254/computeMetadata/v1beta1/instance/network-interfaces/0/access-configs/0/external-ip
 
+export WRK_01=`ssh -i .ssh/docker-user docker-user@swarm-wrk-01 'curl -s 169.254.169.254/computeMetadata/v1beta1/inst
+ance/network-interfaces/0/access-configs/0/external-ip' `
+
+# docker swarm
+docker node update --label-add role=master swarm-mng
+docker node update --label-add role=worker swarm-wrk-01
+docker node update --label-add node=worker-01 swarm-wrk-01
+docker node update --label-add role=worker swarm-wrk-02
+docker node update --label-add node=worker-02 swarm-wrk-02
+
+mkdir -p /opt/docker/etc-gitlab-runner
+docker run --rm -t -i -v /opt/docker/etc-gitlab-runner:/etc/gitlab-runner --name gitlab-runner gitlab/gitlab-runner register --non-interactive  --executor "docker"   --docker-image alpine:3 --url "https://gitlab.com/" --registration-token "gxsecNzfd9VeP_vUnfEK" --description "swarm-mng" --tag-list "docker,master,loadbalancer" --run-untagged   --locked="false"
+
+docker stack deploy -c docker-compose.yml runner
 
 Преимущества:
     1. Использование traefik для доступа к сервисам с автоматическим получением сертификатов SSL
@@ -137,7 +153,7 @@ GCE_INI_PATH=~$(pwd)/gce.ini ./gce.py --list
 Рекомендации:
     1. Постараться разработать и добавить свои метрики и визуализировать их в grafana
     2. Разработать CI\CD
-    3. Доработать систему разворота окружения
+    3. Доработать систему разворота окружения +
     4. Внедрить систему логирования
     5. Доработать документацию
 
