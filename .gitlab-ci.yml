@@ -14,14 +14,17 @@ build_job:
   script:
     - echo 'Building'
   tags:
-  - gitlab-org
+    - gitlab-org
+  when: manual
+
 
 test_unit_job:
   stage: test
   script:
     - echo 'test_unit_job'
   tags:
-  - loadbalancer
+    - loadbalancer
+  when: manual
 
 
 test_integration_job:
@@ -29,8 +32,8 @@ test_integration_job:
   script:
     - echo 'test_unit_job 2'
   tags:
-  - loadbalancer
-
+    - loadbalancer
+  when: manual
 
 
 
