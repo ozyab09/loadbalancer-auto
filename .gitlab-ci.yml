@@ -1,0 +1,38 @@
+image: ruby:2.4.2
+
+stages:
+  - build
+  - test
+
+
+variables:
+  DATABASE_URL: 'mongodb://mongo/user_posts'
+
+
+build_job:
+  stage: build
+  script:
+    - echo 'Building'
+  tags:
+  - gitlab-org
+
+test_unit_job:
+  stage: test
+  script:
+    - echo 'test_unit_job'
+  tags:
+  - loadbalancer
+
+
+test_integration_job:
+  stage: test
+  script:
+    - echo 'test_unit_job 2'
+  tags:
+  - loadbalancer
+
+
+
+
+
+
