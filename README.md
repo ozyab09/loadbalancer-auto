@@ -2,10 +2,19 @@
 1
 terraform apply -auto-approve
 echo "external_ip:" > ../2_dns_records/terraform_inventory
-terraform output | grep wrk-ext | awk '{print "  - " $3}'  >> ../2_dns_records/terraform_inventory
+terraform output | grep mng-ext | awk '{print "  - " $3}'  >> ../2_dns_records/terraform_inventory
 
 2
+cd ../2_dns_records
 ansible-playbook -D gcdns_record.yml -v
+
+3
+docker network create -d overlay traefik_network
+
+eval $(cat .env)
+docker stack deploy -c docker.yml etcd
+docker stack deploy -c docker.yml traefik
+
 
 # проект
 export GOOGLE_PROJECT=keen-phalanx-223413
@@ -59,6 +68,9 @@ WEB:
 gcloud compute --project=keen-phalanx-223413 firewall-rules create allow-80-8080 --direction=INGRESS --priority=1000 --network=default --action=ALLOW --rules=tcp:80,tcp:8080 --source-ranges=0.0.0.0/0 --target-tags=docker-machine
 SSH:
 gcloud compute --project=keen-phalanx-223413 firewall-rules create allow-22 --direction=INGRESS --priority=1000 --network=default --action=ALLOW --rules=tcp:22 --source-ranges=0.0.0.0/0 --target-tags=docker-machine
+# firewall for traefik
+gcloud compute --project=keen-phalanx-223413 firewall-rules create loadbalancer-rules --direction=INGRESS --priority=1000 --network=default --action=ALLOW --rules=tcp:80,tcp:443,tcp:8080 --source-ranges=0.0.0.0/0 --target-tags=loadbalancer-auto
+
 
 # test nginx
 docker run --name nginx -d nginx

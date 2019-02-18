@@ -1,7 +1,11 @@
-version: '2'
+version: '3'
 services:
   etcd0:
     image: quay.io/coreos/etcd
+    deploy:
+      placement:
+        constraints:
+          - node.labels.role == master
     ports:
       - 2379:2379
     volumes:
@@ -27,6 +31,10 @@ services:
 
   etcd1:
     image: quay.io/coreos/etcd
+    deploy:
+      placement:
+        constraints:
+          - node.labels.node == worker-01
     ports:
       - 2379
     volumes:
@@ -52,6 +60,10 @@ services:
 
   etcd2:
     image: quay.io/coreos/etcd
+    deploy:
+      placement:
+        constraints:
+          - node.labels.node == worker-01
     ports:
       - 2379
     volumes:
@@ -80,7 +92,8 @@ volumes:
   etcd1:
   etcd2:
     
+
 networks:
   traefik_network:
-    external:
-      name: traefik_network
+    driver: overlay
+    external: true

@@ -1,8 +1,9 @@
 image: ruby:2.4.2
 
 stages:
-  - build
-  - test
+  - create_infra
+  - dns_records
+  - deploy_stack
 
 
 variables:
@@ -12,25 +13,27 @@ variables:
 build_job:
   stage: build
   script:
-    - echo 'Building'
+    - echo 'this section is empry now.. plz come back later :)'
   tags:
     - gitlab-org
   when: manual
 
 
-test_unit_job:
-  stage: test
+create_dns_record:
+  stage: dns_records
   script:
-    - echo 'test_unit_job'
+    - echo 'echo 'this section is empry now.. plz come back later :)
   tags:
     - loadbalancer
   when: manual
 
 
-test_integration_job:
-  stage: test
+compose_etcd:
+  stage: deploy_stack
   script:
-    - echo 'test_unit_job 2'
+    - cd 3_stack
+    - ls -la
+    - docker stack deploy -c 1_compose-etcd.yml etcd
   tags:
     - loadbalancer
   when: manual
