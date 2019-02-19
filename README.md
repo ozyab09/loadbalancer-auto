@@ -9,12 +9,15 @@ cd ../2_dns_records
 ansible-playbook -D gcdns_record.yml -v
 
 3
-docker network create -d overlay traefik_network
+docker network create --driver=overlay traefik_network
 
 eval $(cat .env)
 docker stack deploy -c docker.yml etcd
 docker stack deploy -c docker.yml traefik
+docker stack down demoapp
+docker stack down traefik
 
+docker stack deploy -c docker.yml traefik
 
 # проект
 export GOOGLE_PROJECT=keen-phalanx-223413

@@ -1,76 +1,48 @@
 version: "3.4"
 services:
-  traefik_init:
-    image: traefik:1.5
-    env_file:
-      - variables.env
-    command:
-      - storeconfig
-      - --api
-      - --entrypoints=Name:http Address::80 Redirect.EntryPoint:https
-      - --entrypoints=Name:https Address::443 TLS
-      - --defaultentrypoints=http,https
-      - --acme
-      - --acme.storage=traefik/acme/account
-      - --acme.entryPoint=https
-      - --acme.httpChallenge.entryPoint=http
-      - --acme.onHostRule=true
-      - --acme.onDemand=false
-      - --acme.email=692677@mail.ru
-      - --docker
-      - --docker.swarmMode
-      - --docker.domain=ozyab.tk
-      - --docker.watch
-      - --docker.exposedbydefault=false
-      - --docker.endpoint=unix:///var/run/docker.sock
-      - --etcd
-      - --etcd.endpoint=etcd0:2379,etcd1:2379,etcd2:2379
-      - --etcd.watch=true
-      - --etcd.prefix=/traefik
-ersion: "3.4"
-services:
-  traefik_init:
-    image: traefik:1.5
-    env_file:
-      - variables.env
-    command:
-      - storeconfig
-      - --api
-      - --entrypoints=Name:http Address::80 Redirect.EntryPoint:https
-      - --entrypoints=Name:https Address::443 TLS
-      - --defaultentrypoints=http,https
-      - --acme
-      - --acme.storage=traefik/acme/account
-      - --acme.entryPoint=https
-      - --acme.httpChallenge.entryPoint=http
-      - --acme.onHostRule=true
-      - --acme.onDemand=false
-      - --acme.email=692677@mail.ru
-      - --docker
-      - --docker.swarmMode
-      - --docker.domain=ozyab.tk
-      - --docker.watch
-      - --docker.exposedbydefault=false
-      - --docker.endpoint=unix:///var/run/docker.sock
-      - --etcd
-      - --etcd.endpoint=etcd0:2379,etcd1:2379,etcd2:2379
-      - --etcd.watch=true
-      - --etcd.prefix=/traefik
-      - --etcd.useAPIV3=true
-      # - "--traefik.docker.network=traefik_network"
-    networks:
-      - traefik_network
+  init:
+    image: traefik
     deploy:
+      mode: replicated
+      placement:
+        constraints:
+          - node.role == manager
       restart_policy:
         condition: on-failure
-  traefik:
-    image: traefik:1.5
+    networks:
+      - traefik_network
+    command:
+      - storeconfig
+      - --api
+      - --entrypoints=Name:http Address::80 Redirect.EntryPoint:https
+      - --entrypoints=Name:https Address::443 TLS
+      #- --defaultentrypoints=http,https
+      - --acme
+      - --acme.storage=traefik/acme/account
+      - --acme.entryPoint=https
+      - --acme.httpChallenge.entryPoint=http
+      - --acme.onHostRule=true
+      - --acme.onDemand=false
+      - --acme.email=692677@mail.ru
+      - --docker
+      - --docker.swarmMode
+      - --docker.domain=ozyab.tk
+      - --docker.watch
+      - --docker.network=traefik_network
+      - --docker.endpoint=unix:///var/run/docker.sock
+      - --etcd
+      - --etcd.endpoint=etcd0:2379,etcd1:2379,etcd2:2379
+      - --etcd.prefix=/traefik
+      - --etcd.useAPIV3=true
+      - --logLevel=DEBUG
+
+  ingress:
+    image: traefik
     depends_on:
       - traefik_init
     command:
       - --etcd
       - --etcd.endpoint=etcd0:2379,etcd1:2379,etcd2:2379
-      - --etcd.watch=true
       - --etcd.prefix=/traefik
       - --etcd.useAPIV3=true
     volumes:
@@ -88,7 +60,7 @@ services:
         published: 8080
         mode: host
     deploy:
-      mode: global
+      mode: replicated
       placement:
         constraints:
           - node.role == manager

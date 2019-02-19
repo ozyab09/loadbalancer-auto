@@ -7,7 +7,7 @@ services:
         constraints:
           - node.labels.role == master
     ports:
-      - 2379:2379
+      - 2379
     volumes:
       - etcd0:/etcd_data
     command:
@@ -63,7 +63,7 @@ services:
     deploy:
       placement:
         constraints:
-          - node.labels.node == worker-01
+          - node.labels.node == worker-02
     ports:
       - 2379
     volumes:
