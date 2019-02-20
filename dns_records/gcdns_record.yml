@@ -5,7 +5,6 @@
   gather_facts: yes
 
 
-
   tasks:
     - name: Include vars of terraform_inventory file
       include_vars:
@@ -28,7 +27,7 @@
         project_id: "{{ project_id }}"
         credentials_file: "{{ credentials_file }}"
         service_account_email: "{{ service_account_email }}"
-        overwrite: true
+        overwrite: true 
       with_items: "{{ subdomains }}"
 
 

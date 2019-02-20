@@ -172,7 +172,13 @@ docker stack deploy -c docker-compose.yml runner
     4. Внедрить систему логирования
     5. Доработать документацию
 
+# openssl
 
+cat gcp-service-account.json | openssl enc -aes-128-cbc -a -salt -pass pass:$gcp_account_pass > gcp-service-account
+
+cd dns_records
+cat gcp-service-account | openssl enc -aes-128-cbc -a -d -salt -pass pass:$gcp_account_pass > gcp-service-account.json
+cat gcp-service-account.json
 
 
 ЧТО СДЕЛАНО

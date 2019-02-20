@@ -1,43 +1,84 @@
-image: ruby:2.4.2
+image: docker:latest
+# services:
+# - docker:dind
 
 stages:
-  - create_infra
-  - dns_records
-  - deploy_stack
-
+  - create infra
+  - dns records
+  - deploy stack
+  - observability
 
 variables:
   DATABASE_URL: 'mongodb://mongo/user_posts'
 
 
 build_job:
-  stage: build
+  stage: create infra
   script:
     - echo 'this section is empry now.. plz come back later :)'
+    - docker info
   tags:
     - gitlab-org
   when: manual
 
 
-create_dns_record:
-  stage: dns_records
+Creating DNS Records:
+  image: williamyeh/ansible:alpine3
+  stage: dns records
   script:
-    - echo 'echo 'this section is empry now.. plz come back later :)
+    - apk --update add curl openssl
+    - EXTERNAL_IP=$(curl -s 169.254.169.254/computeMetadata/v1beta1/instance/network-interfaces/0/access-configs/0/external-ip)
+    - cd dns_records
+    - cat gcp-service-account | openssl enc -aes-128-cbc -a -d -salt -pass pass:$gcp_account_pass > gcp-service-account.json
+    - ansible-playbook -D -e external_ip=$EXTERNAL_IP -i ./inventory gcdns_record.yml -v
   tags:
     - loadbalancer
   when: manual
 
 
-compose_etcd:
-  stage: deploy_stack
+Compose etcd:
+  stage: deploy stack
   script:
-    - cd 3_stack
-    - ls -la
-    - docker stack deploy -c 1_compose-etcd.yml etcd
+    - docker stack deploy -c stack/compose-etcd.yml etcd
   tags:
     - loadbalancer
   when: manual
 
+
+Compose Traefik:
+  stage: deploy stack
+  script:
+    - docker stack deploy -c stack/compose-loadbalancer.yml traefik
+  #  - docker stack deploy -c 3_compose-demoapp.yml demoapp
+  #  - docker stack deploy -c 4_compose-monitoring.yml monitoring
+  tags:
+    - loadbalancer
+  when: manual
+
+Compose Application:
+  stage: deploy stack
+  script:
+    - docker stack deploy -c stack/compose-demoapp.yml traefik
+  tags:
+    - loadbalancer
+  when: manual
+
+Compose Monitoring:
+  stage: observability
+  script:
+    - docker info
+  tags:
+    - loadbalancer
+  when: manual
+
+Compose Logging:
+  stage: observability
+  script:
+    - docker info
+
+  tags:
+    - loadbalancer
+  when: manual
 
 
 
