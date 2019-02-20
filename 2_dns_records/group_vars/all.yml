@@ -9,6 +9,8 @@ subdomains:
   - alertmanager.ozyab.tk
   - unsee.ozyab.tk
   - prometheus.ozyab.tk
+  - ozyab.tk
+  - @.ozyab.tk
 
 project_id: keen-phalanx-223413
 credentials_file: gcp-service-account.json
