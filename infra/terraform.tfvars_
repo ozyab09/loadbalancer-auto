@@ -1,0 +1,32 @@
+# Main
+version         = "1.4.0"
+project         = "keen-phalanx-223413"
+region          = "europe-west1"
+zone            = "europe-west1-b"
+instance_tag    = "loadbalancer-auto"
+public_key      = "~/.ssh/docker-user.pub"
+ssh_key_private = "~/.ssh/docker-user"
+
+#Gitlab CI 
+#gitlab_token    = "gxsecNzfd9VeP_vUnfEK"
+
+# Network
+network         = "default"
+local_subnet    = "10.132.0.0/24"
+
+# Manager
+mng_machine_type    = "f1-micro"
+mng_disk_size       = 50
+mng_disk_image      = "ubuntu-1804-lts"
+mng_int_ip          = "10.132.0.100"
+mng_int_ip_region   = "europe-west1"
+
+# Workers
+wrk_machine_type    = "f1-micro"
+wrk_disk_size       = 50
+wrk_disk_image      = "ubuntu-1804-lts"
+wrk_int_ip_01       = "10.132.0.101"
+wrk_int_ip_02       = "10.132.0.102"
+wrk_int_ip_region   = "europe-west1"
+
+

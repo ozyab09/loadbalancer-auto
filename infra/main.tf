@@ -3,6 +3,7 @@ provider "google" {
   project = "${var.project}"
   region  = "${var.region}"
   zone    = "${var.zone}"
+  credentials = "${var.serviceaccount_file}"
 }
 
 resource "google_compute_instance" "swarm-mng" {
@@ -73,7 +74,7 @@ resource "google_compute_instance" "swarm-mng" {
       # install gitlab-runner
       "sudo mkdir -p /opt/docker/etc-gitlab-runner/",
 
-      "sudo docker run --rm -t -i -v /opt/docker/etc-gitlab-runner:/etc/gitlab-runner --name gitlab-runner gitlab/gitlab-runner register --non-interactive --executor \"docker\" --docker-image alpine:3 --url \"https://gitlab.com/\" --registration-token \"${var.gitlab_token}\" --description \"swarm-mng\" --tag-list \"docker,master,loadbalancer\" --run-untagged   --locked=\"false\"",
+      "sudo docker run --rm -t -i -v /opt/docker/etc-gitlab-runner:/etc/gitlab-runner --name gitlab-runner gitlab/gitlab-runner register --non-interactive --executor \"docker\" --docker-image alpine:3 --url \"https://gitlab.com/\" --registration-token \"$gitlab_token\" --description \"swarm-mng\" --tag-list \"docker,master,loadbalancer\" --run-untagged   --locked=\"false\"",
 
       # run gitlab-runner
       "sudo docker stack deploy -c /home/docker-user/runner-stack.yml runner",

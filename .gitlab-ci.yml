@@ -3,28 +3,54 @@ image: docker:latest
 # - docker:dind
 
 stages:
-  - create infra
-  - dns records
+  - Infra
+  - DNS Records
   - deploy stack
   - observability
 
 variables:
-  DATABASE_URL: 'mongodb://mongo/user_posts'
+  TERRAFORM_VERSION: '0.11.10'
 
 
-build_job:
-  stage: create infra
+1_Validate:
+  image: ventx/alpine
+  stage: Infra
   script:
-    - echo 'this section is empry now.. plz come back later :)'
-    - docker info
+    - cd infra && chmod +x ./before_script.sh && ./before_script.sh
+    - terraform init 
+    - terraform validate
+  tags:
+    - gitlab-org
+  when: manual
+
+2_Create:
+  image: ventx/alpine
+  stage: Infra
+  script:
+    - cd infra && chmod +x ./before_script.sh && ./before_script.sh
+    - terraform init
+    - terraform validate 
+    - terraform apply -auto-approve
+  tags:
+    - gitlab-org
+  when: manual
+
+3_Destroy:
+  image: ventx/alpine
+  stage: Infra
+  script:
+    - cd infra && chmod +x ./before_script.sh && ./before_script.sh
+    - terraform init
+    - terraform validate
+    - terraform destroy -auto-approve
   tags:
     - gitlab-org
   when: manual
 
 
-Creating DNS Records:
+Creating Records:
   image: williamyeh/ansible:alpine3
-  stage: dns records
+  stage: DNS Records
   script:
     - apk --update add curl openssl
     - EXTERNAL_IP=$(curl -s 169.254.169.254/computeMetadata/v1beta1/instance/network-interfaces/0/access-configs/0/external-ip)
@@ -36,7 +62,7 @@ Creating DNS Records:
   when: manual
 
 
-Compose etcd:
+1_etcd:
   stage: deploy stack
   script:
     - docker stack deploy -c stack/compose-etcd.yml etcd
@@ -45,7 +71,7 @@ Compose etcd:
   when: manual
 
 
-Compose Traefik:
+2_Traefik:
   stage: deploy stack
   script:
     - docker stack deploy -c stack/compose-loadbalancer.yml traefik
@@ -55,7 +81,7 @@ Compose Traefik:
     - loadbalancer
   when: manual
 
-Compose Application:
+3_Application:
   stage: deploy stack
   script:
     - docker stack deploy -c stack/compose-demoapp.yml traefik
@@ -63,7 +89,7 @@ Compose Application:
     - loadbalancer
   when: manual
 
-Compose Monitoring:
+1_Monitoring:
   stage: observability
   script:
     - docker info
@@ -71,7 +97,7 @@ Compose Monitoring:
     - loadbalancer
   when: manual
 
-Compose Logging:
+2_Logging:
   stage: observability
   script:
     - docker info

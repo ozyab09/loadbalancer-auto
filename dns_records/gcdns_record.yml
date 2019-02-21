@@ -18,6 +18,9 @@
          - apache-libcloud
          - pycrypto
 
+    - name: Creating zone 
+      gcdns_zone: zone={{ domain }}
+
     - name: Creating DNS records
       gcdns_record:
         record: "{{ item }}"

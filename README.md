@@ -180,6 +180,8 @@ cd dns_records
 cat gcp-service-account | openssl enc -aes-128-cbc -a -d -salt -pass pass:$gcp_account_pass > gcp-service-account.json
 cat gcp-service-account.json
 
+cat ~/.ssh/docker-user |  openssl enc -aes-128-cbc -a -salt -pass pass:djsrockdahouse > docker-user
+
 
 ЧТО СДЕЛАНО
 изменен домен на ozyab.tk
