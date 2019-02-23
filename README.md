@@ -183,6 +183,10 @@ cat gcp-service-account.json
 cat ~/.ssh/docker-user |  openssl enc -aes-128-cbc -a -salt -pass pass:djsrockdahouse > docker-user
 
 
+# elasticsearch
+Добавлен
+https://github.com/vvanholl/elasticsearch-prometheus-exporter
+
 ЧТО СДЕЛАНО
 изменен домен на ozyab.tk
 управление доменом изменено с route53 на google cloud DNS

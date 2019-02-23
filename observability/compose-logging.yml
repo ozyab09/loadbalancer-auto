@@ -1,0 +1,122 @@
+version: '3.5'
+
+volumes:
+  esdata1:
+  esdata2:
+
+services:
+
+  logspout:
+    image: gliderlabs/logspout:v3.2.4
+    depends_on:
+      - lostash
+    command: syslog://logstash:5000
+    environment:
+      - RETRY_COUNT=100
+    deploy:
+      mode: global
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 1G
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+
+  logstash:
+    image: ozyab/loadbalancer-logstash
+    depends_on:
+      - elasticsearch
+    environment:
+      - LOGSPOUT=ignore
+      - XPACK_WATCHER_ENABLED=false
+      - XPACK_MONITORING_ENABLED=false
+      - xpack.security.enabled=false
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 1G
+
+
+  kibana:
+    image:  docker.elastic.co/kibana/kibana:6.2.2
+    depends_on:
+      - elasticsearch
+    environment:
+      - LOGSPOUT=ignore
+      - ELASTICSEARCH_URL=http://elasticsearch1:9200
+      - SERVER_NAME=kibana.ozyab.tk
+      - xpack.security.enabled=false
+      - elasticsearch.user=user
+      - elasticsearch.password=kibana_pass
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.basic.frontend.rule=Host:kibana.ozyab.tk"
+        - "traefik.basic.port=5601"
+        - "traefik.basic.protocol=http" 
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 1G
+
+
+  elasticsearch1:
+    image: ozyab/loadbalancer-elasticsearch
+    environment:
+      - LOGSPOUT=ignore
+      - cluster.name=loadbalancer-cluster
+      - xpack.monitoring.enabled=false
+      - xpack.watcher.enabled=false
+      - xpack.graph.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "discovery.zen.ping.unicast.hosts=elasticsearch2"
+      - "discovery.zen.minimum_master_nodes=2"
+      - node.name=elasticsearch1
+    volumes:
+      - esdata1:/usr/share/elasticsearch/data
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 1G
+      placement:
+        constraints:
+          - node.labels.node == worker-01
+
+  elasticsearch2:
+    image: ozyab/loadbalancer-elasticsearch
+    depends_on:
+      - elasticsearch1
+    environment:
+      - LOGSPOUT=ignore
+      - cluster.name=loadbalancer-cluster
+      - xpack.monitoring.enabled=false
+      - xpack.watcher.enabled=false
+      - xpack.graph.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "discovery.zen.ping.unicast.hosts=elasticsearch1"
+      - "discovery.zen.minimum_master_nodes=2"
+      - node.name=elasticsearch2
+    volumes:
+      - esdata1:/usr/share/elasticsearch/data
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 1G
+      placement:
+        constraints:
+          - node.labels.node == worker-02
+
+networks:
+  default:
+    external:
+      name: traefik_network
+

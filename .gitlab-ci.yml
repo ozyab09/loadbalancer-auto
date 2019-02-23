@@ -102,7 +102,6 @@ Creating Records:
   stage: observability
   script:
     - docker stack deploy -c observability/compose-logging.yml logging
-
   tags:
     - loadbalancer
   when: manual

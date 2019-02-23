@@ -7,4 +7,5 @@ COPY dashboards /etc/grafana/dashboards/
 ENV GF_SECURITY_ADMIN_PASSWORD=password_admin \
     GF_SECURITY_ADMIN_USER=admin_admin \
     GF_PATHS_PROVISIONING=/etc/grafana/provisioning/
-    
+
+# docker build -t ozyab/loadbalancer-grafana .

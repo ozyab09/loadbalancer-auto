@@ -139,6 +139,7 @@ resource "google_compute_instance" "swarm-wrk-01" {
       "ssh -o StrictHostKeyChecking=no -o NoHostAuthenticationForLocalhost=yes -o UserKnownHostsFile=/dev/null -i /home/docker-user/key.pem docker-user@${google_compute_address.swarm-mng-int.address} 'sudo docker node update --label-add role=worker swarm-wrk-01'",
 
       "ssh -o StrictHostKeyChecking=no -o NoHostAuthenticationForLocalhost=yes -o UserKnownHostsFile=/dev/null -i /home/docker-user/key.pem docker-user@${google_compute_address.swarm-mng-int.address} 'sudo docker node update --label-add node=worker-01 swarm-wrk-01'",
+      "sudo sysctl -w vm.max_map_count=262144" #for elasticsearch
     ]
   }
 }
@@ -200,6 +201,8 @@ resource "google_compute_instance" "swarm-wrk-02" {
       "ssh -o StrictHostKeyChecking=no -o NoHostAuthenticationForLocalhost=yes -o UserKnownHostsFile=/dev/null -i /home/docker-user/key.pem docker-user@${google_compute_address.swarm-mng-int.address} 'sudo docker node update --label-add role=worker swarm-wrk-02'",
 
       "ssh -o StrictHostKeyChecking=no -o NoHostAuthenticationForLocalhost=yes -o UserKnownHostsFile=/dev/null -i /home/docker-user/key.pem docker-user@${google_compute_address.swarm-mng-int.address} 'sudo docker node update --label-add node=worker-02 swarm-wrk-02'",
+      "sudo sysctl -w vm.max_map_count=262144" #for elasticsearch
+
     ]
   }
 }
