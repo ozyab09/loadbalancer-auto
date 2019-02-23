@@ -9,12 +9,6 @@ volumes:
     prometheus: 
     grafana: {}
 
-# configs:
-
-#   node_rules:
-#     file: ./prometheus/rules/swarm_node.rules.yml
-#   task_rules:
-#     file: ./prometheus/rules/swarm_task.rules.yml
 
 services:
   dockerd-exporter:

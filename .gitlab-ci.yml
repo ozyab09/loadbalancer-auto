@@ -65,6 +65,7 @@ Creating Records:
 1_etcd:
   stage: deploy stack
   script:
+    - docker network create -d overlay traefik_network
     - docker stack deploy -c stack/compose-etcd.yml etcd
   tags:
     - loadbalancer
@@ -84,7 +85,7 @@ Creating Records:
 3_Application:
   stage: deploy stack
   script:
-    - docker stack deploy -c stack/compose-demoapp.yml traefik
+    - docker stack deploy -c stack/compose-demoapp.yml demoapp
   tags:
     - loadbalancer
   when: manual
@@ -92,7 +93,7 @@ Creating Records:
 1_Monitoring:
   stage: observability
   script:
-    - docker info
+    - docker stack deploy -c stack/compose-monitoring.yml monitoring
   tags:
     - loadbalancer
   when: manual
@@ -100,7 +101,7 @@ Creating Records:
 2_Logging:
   stage: observability
   script:
-    - docker info
+    - docker stack deploy -c stack/compose-logging.yml logging
 
   tags:
     - loadbalancer

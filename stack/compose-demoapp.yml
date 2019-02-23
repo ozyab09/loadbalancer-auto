@@ -14,7 +14,6 @@ services:
         - traefik.basic.frontend.rule=Host:shop.ozyab.tk
         - traefik.basic.protocol=http
         - traefik.docker.network=traefik_network
-        - traefik.entrypoints=https
 
   catalogue:
     image: weaveworksdemos/catalogue:0.3.5
@@ -89,8 +88,3 @@ networks:
     external:
       name: traefik_network
 
-# networks:
-#   default:
-#     traefik_network:
-#       driver: overlay
-#       external: true
