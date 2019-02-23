@@ -93,7 +93,7 @@ Creating Records:
 1_Monitoring:
   stage: observability
   script:
-    - docker stack deploy -c stack/compose-monitoring.yml monitoring
+    - docker stack deploy -c observability/compose-monitoring.yml monitoring
   tags:
     - loadbalancer
   when: manual
@@ -101,7 +101,7 @@ Creating Records:
 2_Logging:
   stage: observability
   script:
-    - docker stack deploy -c stack/compose-logging.yml logging
+    - docker stack deploy -c observability/compose-logging.yml logging
 
   tags:
     - loadbalancer

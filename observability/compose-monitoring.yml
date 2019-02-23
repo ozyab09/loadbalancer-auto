@@ -39,7 +39,7 @@ services:
           memory: 64M
 
   grafana:
-    image: stefanprodan/swarmprom-grafana:5.3.4
+    image: ozyab/loadbalancer-grafana
     environment:
       - GF_SECURITY_ADMIN_USER=ADMIN_USER
       - GF_SECURITY_ADMIN_PASSWORD=ADMIN_PASSWORD
@@ -88,21 +88,13 @@ services:
           memory: 64M
 
   prometheus:
-    image: stefanprodan/swarmprom-prometheus:v2.5.0
+    image: ozyab/loadbalancer-prometheus
     command:
-      - '--config.file=/etc/prometheus.yml'
+      - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
       - '--storage.tsdb.retention=24h'
     volumes:
       - prometheus:/prometheus
-      - /opt/prometheus/prometheus.yml:/etc/prometheus.yml:ro  #directory on node
-
-    # configs:
-    #   - source: node_rules
-    #     target: /etc/prometheus/swarm_node.rules.yml
-    #   - source: task_rules
-    #     target: /etc/prometheus/swarm_task.rules.yml
-
     deploy:
       labels:
         - "traefik.enable=true"
@@ -111,9 +103,6 @@ services:
         - "traefik.basic.protocol=http"
       mode: replicated
       replicas: 1
-      placement:
-        constraints:
-          - node.labels.node == worker-02
       resources:
         limits:
           memory: 2048M
