@@ -3,5 +3,5 @@
 *.tfstate.backup
 *.tfvars
 .terraform/
-*/gcp-service-account.json
+gcp-service-account.json
 */.env
