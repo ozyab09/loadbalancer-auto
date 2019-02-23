@@ -186,3 +186,7 @@ cat ~/.ssh/docker-user |  openssl enc -aes-128-cbc -a -salt -pass pass:djsrockda
 ЧТО СДЕЛАНО
 изменен домен на ozyab.tk
 управление доменом изменено с route53 на google cloud DNS
+
+
+Check zones
+https://console.cloud.google.com/net-services/dns/zones

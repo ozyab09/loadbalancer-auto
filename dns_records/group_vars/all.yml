@@ -1,0 +1,11 @@
+
+---
+# main
+
+domain: ozyab.tk
+
+project_id: keen-phalanx-223413
+credentials_file: gcp-service-account.json
+service_account_email: dns-administrator@keen-phalanx-223413.iam.gserviceaccount.com
+
+

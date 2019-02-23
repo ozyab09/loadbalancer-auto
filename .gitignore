@@ -5,4 +5,3 @@
 .terraform/
 */gcp-service-account.json
 */.env
-dns_records/group_vars/all.yml

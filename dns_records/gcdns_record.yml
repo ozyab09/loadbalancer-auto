@@ -6,31 +6,36 @@
 
 
   tasks:
-    - name: Include vars of terraform_inventory file
-      include_vars:
-        file: terraform_inventory
-
-
-
     - name: Install Pip Dependencies
-      pip: 
-       name:
-         - apache-libcloud
-         - pycrypto
+      pip:
+        name:
+          - apache-libcloud
+          - pycrypto
 
-    - name: Creating zone 
-      gcdns_zone: zone={{ domain }}
+    - name: Creating zone
+      gcdns_zone:
+        zone: "{{ domain }}"
+        description: "{{ domain }}"
+        project_id: "{{ project_id }}"
+        credentials_file: "{{ credentials_file }}"
+        service_account_email: "{{ service_account_email }}"
+
 
     - name: Creating DNS records
       gcdns_record:
         record: "{{ item }}"
-        zone_id: "{{ domain }}"
+        zone_id: "{{ domain  | regex_replace('\\.', '-') }}"
         type: A
         record_data: "{{ external_ip }}"
         project_id: "{{ project_id }}"
         credentials_file: "{{ credentials_file }}"
         service_account_email: "{{ service_account_email }}"
-        overwrite: true 
-      with_items: "{{ subdomains }}"
+        overwrite: true
+      with_items:
+        - "{{ domain }}"
+        - "@.{{ domain }}"
+        - "*.{{ domain }}"
+
+
 
 
