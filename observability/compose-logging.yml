@@ -48,14 +48,14 @@ services:
     environment:
       - LOGSPOUT=ignore
       - ELASTICSEARCH_URL=http://elasticsearch1:9200
-      - SERVER_NAME=kibana.ozyab.tk
+      - SERVER_NAME=kibana.${DOMAIN}
       - xpack.security.enabled=false
       - elasticsearch.user=user
       - elasticsearch.password=kibana_pass
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.basic.frontend.rule=Host:kibana.ozyab.tk"
+        - "traefik.basic.frontend.rule=Host:kibana.${DOMAIN}"
         - "traefik.basic.port=5601"
         - "traefik.basic.protocol=http" 
       resources:

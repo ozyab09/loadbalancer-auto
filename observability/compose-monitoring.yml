@@ -41,15 +41,15 @@ services:
   grafana:
     image: ozyab/loadbalancer-grafana
     environment:
-      - GF_SECURITY_ADMIN_USER=ADMIN_USER
-      - GF_SECURITY_ADMIN_PASSWORD=ADMIN_PASSWORD
+      - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
       - GF_USERS_ALLOW_SIGN_UP=false
     volumes:
       - grafana:/var/lib/grafana
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.basic.frontend.rule=Host:grafana.ozyab.tk"
+        - "traefik.basic.frontend.rule=Host:grafana.${DOMAIN}"
         - "traefik.basic.port=3000"
         - "traefik.basic.protocol=http" 
       mode: replicated
@@ -98,7 +98,7 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.basic.frontend.rule=Host:prometheus.ozyab.tk"
+        - "traefik.basic.frontend.rule=Host:prometheus.${DOMAIN}"
         - "traefik.basic.port=9090"
         - "traefik.basic.protocol=http"
       mode: replicated
@@ -108,3 +108,4 @@ services:
           memory: 2048M
         reservations:
           memory: 128M
+

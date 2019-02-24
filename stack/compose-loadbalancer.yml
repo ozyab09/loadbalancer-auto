@@ -24,10 +24,10 @@ services:
       - --acme.httpChallenge.entryPoint=http
       - --acme.onHostRule=true
       - --acme.onDemand=false
-      - --acme.email=692677@mail.ru
+      - --acme.email=${EMAIL}
       - --docker
       - --docker.swarmMode
-      - --docker.domain=ozyab.tk
+      - --docker.domain=${DOMAIN}
       - --docker.watch
       - --docker.network=traefik_network
       - --docker.endpoint=unix:///var/run/docker.sock

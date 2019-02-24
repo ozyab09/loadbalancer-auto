@@ -5,13 +5,12 @@ services:
     image: weaveworksdemos/front-end:0.3.12
     environment:
       - reschedule=on-node-failure
-
     ports:
        - 8079
     deploy:
       labels:
         - traefik.port=8079
-        - traefik.basic.frontend.rule=Host:shop.ozyab.tk
+        - traefik.basic.frontend.rule=Host:shop.${DOMAIN}
         - traefik.basic.protocol=http
         - traefik.docker.network=traefik_network
 

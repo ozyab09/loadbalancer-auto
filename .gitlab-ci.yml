@@ -75,9 +75,7 @@ Creating Records:
 2_Traefik:
   stage: deploy stack
   script:
-    - docker stack deploy -c stack/compose-loadbalancer.yml traefik
-  #  - docker stack deploy -c 3_compose-demoapp.yml demoapp
-  #  - docker stack deploy -c 4_compose-monitoring.yml monitoring
+    - eval $(cat .env) docker stack deploy -c stack/compose-loadbalancer.yml traefik
   tags:
     - loadbalancer
   when: manual
@@ -85,7 +83,7 @@ Creating Records:
 3_Application:
   stage: deploy stack
   script:
-    - docker stack deploy -c stack/compose-demoapp.yml demoapp
+    - eval $(cat .env) docker stack deploy -c stack/compose-demoapp.yml demoapp
   tags:
     - loadbalancer
   when: manual
@@ -93,7 +91,7 @@ Creating Records:
 1_Monitoring:
   stage: observability
   script:
-    - docker stack deploy -c observability/compose-monitoring.yml monitoring
+    - eval $(cat .env) docker stack deploy -c observability/compose-monitoring.yml monitoring
   tags:
     - loadbalancer
   when: manual
@@ -101,7 +99,7 @@ Creating Records:
 2_Logging:
   stage: observability
   script:
-    - docker stack deploy -c observability/compose-logging.yml logging
+    - eval $(cat .env) docker stack deploy -c observability/compose-logging.yml logging
   tags:
     - loadbalancer
   when: manual
