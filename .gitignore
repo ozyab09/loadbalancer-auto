@@ -1,3 +1,7 @@
-group_vars/
-inventory
-stack/.env
+*.tfstate
+*.tfstate.*.backup
+*.tfstate.backup
+*.tfvars
+.terraform/
+gcp-service-account.json
+*/.env

@@ -1,7 +1,17 @@
 version: "3.4"
 services:
-  traefik_init:
-    image: traefik:1.5
+  init:
+    image: traefik:1.7.9-alpine
+
+    deploy:
+      mode: replicated
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+    networks:
+      - traefik_network
     command:
       - storeconfig
       - --api
@@ -14,38 +24,26 @@ services:
       - --acme.httpChallenge.entryPoint=http
       - --acme.onHostRule=true
       - --acme.onDemand=false
-      - --acme.email=${USER_EMAIL}
+      - --acme.email=${EMAIL}
       - --docker
-      #- "--docker.swarmMode"
+      - --docker.swarmMode
       - --docker.domain=${DOMAIN}
       - --docker.watch
-      - --docker.exposedbydefault=false
+      - --docker.network=traefik_network
       - --docker.endpoint=unix:///var/run/docker.sock
       - --etcd
-      - --etcd.endpoint=${ETCD_ENDPOINT}
-      - --etcd.watch=true
+      - --etcd.endpoint=etcd0:2379
       - --etcd.prefix=/traefik
       - --etcd.useAPIV3=true
-      # - "--traefik.docker.network=traefik_network"
-    networks:
-      - traefik_network
-  #  deploy:
-  #    restart_policy:
-  #      condition: on-failure
-    # depends_on:
-    #   - consul
-  traefik:
-    image: traefik:1.5
+      - --logLevel=DEBUG
+
+  ingress:
+    image: traefik:1.7.9-alpine
     depends_on:
       - traefik_init
-      # - consul
     command:
-      # - "--consul"
-      # - "--consul.endpoint=consul:8500"
-      # - "--consul.prefix=traefik"
       - --etcd
-      - --etcd.endpoint=${ETCD_ENDPOINT}
-      - --etcd.watch=true
+      - --etcd.endpoint=etcd0:2379
       - --etcd.prefix=/traefik
       - --etcd.useAPIV3=true
     volumes:
@@ -62,43 +60,18 @@ services:
       - target: 8080
         published: 8080
         mode: host
-  #  deploy:
-  #    mode: global
-  #    placement:
-  #      constraints:
-  #        - node.role == manager
-  #    update_config:
-  #      parallelism: 1
-  #      delay: 10s
-  #    restart_policy:
-  #      condition: on-failure
-  # consul:
-  #   image: consul
-  #   command: agent -server -bootstrap-expect=1
-  #   volumes:
-  #     - consul-data:/consul/data
-  #   environment:
-  #     - CONSUL_LOCAL_CONFIG={"datacenter":"us_east2","server":true}
-  #     - CONSUL_BIND_INTERFACE=eth0
-  #     - CONSUL_CLIENT_INTERFACE=eth0
-  #  deploy:
-  #    replicas: 1
-  #    placement:
-  #      constraints:
-  #        - node.role == manager
-  #    restart_policy:
-  #      condition: on-failure
-    # networks:
-    #   - traefik_network
-
-# networks:
- #   external:
- #     name: webgateway
+    deploy:
+      mode: replicated
+      placement:
+        constraints:
+          - node.role == manager
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+  
 networks:
   traefik_network:
-    external:
-      name: traefik_network
-
-
-
-      
+    driver: overlay
+    external: true

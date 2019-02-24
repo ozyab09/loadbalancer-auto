@@ -1,0 +1,109 @@
+image: docker:latest
+# services:
+# - docker:dind
+
+stages:
+  - Infra
+  - DNS Records
+  - deploy stack
+  - observability
+
+variables:
+  TERRAFORM_VERSION: '0.11.10'
+
+
+1_Validate:
+  image: ventx/alpine
+  stage: Infra
+  script:
+    - cd infra && chmod +x ./before_script.sh && ./before_script.sh
+    - terraform init 
+    - terraform validate
+  tags:
+    - gitlab-org
+  when: manual
+
+2_Create:
+  image: ventx/alpine
+  stage: Infra
+  script:
+    - cd infra && chmod +x ./before_script.sh && ./before_script.sh
+    - terraform init
+    - terraform validate 
+    - terraform apply -auto-approve
+  tags:
+    - gitlab-org
+  when: manual
+
+3_Destroy:
+  image: ventx/alpine
+  stage: Infra
+  script:
+    - cd infra && chmod +x ./before_script.sh && ./before_script.sh
+    - terraform init
+    - terraform validate
+    - terraform destroy -auto-approve
+  tags:
+    - gitlab-org
+  when: manual
+
+
+Creating Records:
+  image: williamyeh/ansible:alpine3
+  stage: DNS Records
+  script:
+    - apk --update add curl openssl
+    - EXTERNAL_IP=$(curl -s 169.254.169.254/computeMetadata/v1beta1/instance/network-interfaces/0/access-configs/0/external-ip)
+    - cd dns_records
+    - cat ../gcp-service-account | openssl enc -aes-128-cbc -a -d -salt -pass pass:$gcp_account_pass > gcp-service-account.json
+    - ansible-playbook -D -e external_ip=$EXTERNAL_IP -i ./inventory gcdns_record.yml -v
+  tags:
+    - loadbalancer
+  when: manual
+
+
+1_etcd:
+  stage: deploy stack
+  script:
+    - docker network create -d overlay traefik_network
+    - docker stack deploy -c stack/compose-etcd.yml etcd
+  tags:
+    - loadbalancer
+  when: manual
+
+
+2_Traefik:
+  stage: deploy stack
+  script:
+    - eval $(cat .env) docker stack deploy -c stack/compose-loadbalancer.yml traefik
+  tags:
+    - loadbalancer
+  when: manual
+
+3_Application:
+  stage: deploy stack
+  script:
+    - eval $(cat .env) docker stack deploy -c stack/compose-demoapp.yml demoapp
+  tags:
+    - loadbalancer
+  when: manual
+
+1_Monitoring:
+  stage: observability
+  script:
+    - eval $(cat .env) docker stack deploy -c observability/compose-monitoring.yml monitoring
+  tags:
+    - loadbalancer
+  when: manual
+
+2_Logging:
+  stage: observability
+  script:
+    - eval $(cat .env) docker stack deploy -c observability/compose-logging.yml logging
+  tags:
+    - loadbalancer
+  when: manual
+
+
+
+

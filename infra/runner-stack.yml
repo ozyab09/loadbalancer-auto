@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+
+ runner:
+  image: gitlab/gitlab-runner:latest
+  deploy:
+   placement:
+    constraints:
+      - node.labels.role == master
+  volumes:
+   - /opt/docker/etc-gitlab-runner:/etc/gitlab-runner
+   - /var/run/docker.sock:/var/run/docker.sock
