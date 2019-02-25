@@ -1,196 +1,193 @@
-# How to run
-1
-terraform apply -auto-approve
-echo "external_ip:" > ../2_dns_records/terraform_inventory
-terraform output | grep mng-ext | awk '{print "  - " $3}'  >> ../2_dns_records/terraform_inventory
+# Automatic Loadbalancer
 
-2
-cd ../2_dns_records
-ansible-playbook -D gcdns_record.yml -v
+This project creating infrastructure in Google Cloud Project in deploy into it Demo Application, monitoring and logging systems.
 
-3
-docker network create --driver=overlay traefik_network
+# Quickstart
 
-eval $(cat .env)
-docker stack deploy -c docker.yml etcd
-docker stack deploy -c docker.yml traefik
-docker stack down demoapp
-docker stack down traefik
+1. Make fork from current project
 
-docker stack deploy -c docker.yml traefik
+2. Replace config files:
 
-# проект
-export GOOGLE_PROJECT=keen-phalanx-223413
+* [.env](.env) - main information about your project and authorized information for logging into Grafana service.
 
-# создание
-docker-machine create --driver google \
-    --google-machine-image https://www.googleapis.com/compute/v1/projects/ubuntu-os-cloud/global/images/family/ubuntu-1604-lts \
-    --google-machine-type n1-standard-1 \
-    --google-zone europe-west1-b \
-    --google-disk-size=50 \
-    docker-host
+* [gcp-service-account](gcp-service-account) - your encoded JSON-file, granted of [Service accounts](https://console.cloud.google.com/iam-admin/serviceaccounts) section of Google Cloud Platform.
 
-# переколючение
-eval $(docker-machine env docker-host)
+For encode your source file `gcp-service-account.json`, run the following command:
 
-
-# docker url
-DOCKER_URL=$(docker-machine ls --format "{{.URL}}" --filter name=docker-host)
-DOCKER_IP=${DOCKER_URL:6:-5}
-echo $DOCKER_IP
-
-
-# ip-address to persistent
-gcloud compute addresses create [ADDRESS_NAME] \
-  --addresses [IP_ADDRESS] --region [REGION]
-where:
-
-[ADDRESS_NAME] is the name you want to call this address.
-[IP_ADDRESS] is the IP address you want to promote.
-[REGION] is the region the IP address belongs to.
-
-example:
-
-gcloud compute addresses create docker-host \
-  --addresses $DOCKER_IP \
-  --region europe-west1
-
-## delete OLD adress
-gcloud compute addresses delete docker-host --region europe-west1
-
-
-# traefik
-docker run -d -p 8080:8080 -p 80:80 -v $PWD/traefik.toml:/etc/traefik/traefik.toml -v /var/run/docker.sock:/var/run/docker.sock traefik
-
-`file should be on server! by path  /opt/traefik/traefik.toml`
-docker run -d -p 8080:8080 -p 80:80 -v /opt/traefik/traefik.toml:/etc/traefik/traefik.toml -v /var/run/docker.sock:/var/run/docker.sock traefik
-
-
-# firewall
-WEB:
-gcloud compute --project=keen-phalanx-223413 firewall-rules create allow-80-8080 --direction=INGRESS --priority=1000 --network=default --action=ALLOW --rules=tcp:80,tcp:8080 --source-ranges=0.0.0.0/0 --target-tags=docker-machine
-SSH:
-gcloud compute --project=keen-phalanx-223413 firewall-rules create allow-22 --direction=INGRESS --priority=1000 --network=default --action=ALLOW --rules=tcp:22 --source-ranges=0.0.0.0/0 --target-tags=docker-machine
-# firewall for traefik
-gcloud compute --project=keen-phalanx-223413 firewall-rules create loadbalancer-rules --direction=INGRESS --priority=1000 --network=default --action=ALLOW --rules=tcp:80,tcp:443,tcp:8080 --source-ranges=0.0.0.0/0 --target-tags=loadbalancer-auto
-
-
-# test nginx
-docker run --name nginx -d nginx
-
-
-# connect
-ssh -i ~/.ssh/docker-host docker-user@$DOCKER_IP
-
-# ansible
-maked config file
-check: `ansible -i inventory docker -a "free"`
-sudo apt install python-pip
-sudo pip install docker-py
-
-# aws
-ansible-playbook deploy/route53.yml -vv
-http://me-test.${domain}
-
-# nginx deploy
-ansible-playbook tracefik/deploy_nginx.yml 
-
-# etcd
-run: cd etc & docker-compose up -d
-
-check:
-curl 172.20.0.4:2379/version
-put the message:
+Your JSON-file should looking like follow text:
 ```
-curl http://172.20.0.4:2379/v2/keys/message -XPUT -d value="Hello world"
-{"action":"set","node":{"key":"/message","value":"Hello world","modifiedIndex":8,"createdIndex":8}}
+{
+  "type": "service_account",
+  "project_id": "your_project_id",
+  "private_key_id": "your_private_key_id",
+  "private_key": "your_private_key",
+  "client_email": "your_client_email@gserviceaccount.com",
+  "client_id": "your_client_id",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/****.gserviceaccount.com"
+}
 ```
-get the message:
+Encode your file:
 ```
-curl http://172.20.0.4:2379/v2/keys/message
-{"action":"get","node":{"key":"/message","value":"Hello world","modifiedIndex":8,"createdIndex":8}}
-```
-
-full version: https://coreos.com/etcd/docs/latest/v2/api.html
-
-
-# monitoring
-swarmprom
-
-# Сервисная учестная запись google
-https://console.cloud.google.com/apis/credentials/serviceaccountkey
-![Monitoring Pipeline](images/img-01.png)
-
-
-
-# Starting project
-docker-compose -f 1_compose-etcd.yml up -d
-docker-compose -f 2_compose-loadbalancer.yml up -d
-docker-compose -f 3_compose-demoapp.yml  up -d
-
-
-# Terraform
-terraform apply -auto-approve
-terraform output
-
-# Dynamic inventory
-pip install pycrypto
-cd gce
-mkdir -p ~/.ansible/tmp
-chmod +x gce.py
-GCE_INI_PATH=~$(pwd)/gce.ini ./gce.py --list
-
-# узанть свой внешний IP
-curl 169.254.169.254/computeMetadata/v1beta1/instance/network-interfaces/0/access-configs/0/external-ip
-
-export WRK_01=`ssh -i .ssh/docker-user docker-user@swarm-wrk-01 'curl -s 169.254.169.254/computeMetadata/v1beta1/inst
-ance/network-interfaces/0/access-configs/0/external-ip' `
-
-# docker swarm
-docker node update --label-add role=master swarm-mng
-docker node update --label-add role=worker swarm-wrk-01
-docker node update --label-add node=worker-01 swarm-wrk-01
-docker node update --label-add role=worker swarm-wrk-02
-docker node update --label-add node=worker-02 swarm-wrk-02
-
-mkdir -p /opt/docker/etc-gitlab-runner
-docker run --rm -t -i -v /opt/docker/etc-gitlab-runner:/etc/gitlab-runner --name gitlab-runner gitlab/gitlab-runner register --non-interactive  --executor "docker"   --docker-image alpine:3 --url "https://gitlab.com/" --registration-token "gxsecNzfd9VeP_vUnfEK" --description "swarm-mng" --tag-list "docker,master,loadbalancer" --run-untagged   --locked="false"
-
-docker stack deploy -c docker-compose.yml runner
-
-Преимущества:
-    1. Использование traefik для доступа к сервисам с автоматическим получением сертификатов SSL
-    2. Использование в проекте docker swarm является и плюсом и минусом одновременно
-    3. Примененное приложение sockshop в лучших традициях показывает что такое микросервис
-    4. Решение использовать swarmprom достаточно логичное
-    5. Управление route53 от AWS при помощи ansible
-
-Рекомендации:
-    1. Постараться разработать и добавить свои метрики и визуализировать их в grafana
-    2. Разработать CI\CD
-    3. Доработать систему разворота окружения +
-    4. Внедрить систему логирования
-    5. Доработать документацию
-
-# openssl
-
+gcp_account_pass=YOUR_SUPER_PASSWORD
 cat gcp-service-account.json | openssl enc -aes-128-cbc -a -salt -pass pass:$gcp_account_pass > gcp-service-account
+```
 
-cd dns_records
-cat gcp-service-account | openssl enc -aes-128-cbc -a -d -salt -pass pass:$gcp_account_pass > gcp-service-account.json
-cat gcp-service-account.json
+Remember your password. In the future, we will need it.
 
-cat ~/.ssh/docker-user |  openssl enc -aes-128-cbc -a -salt -pass pass:djsrockdahouse > docker-user
+* [infra/docker-user](infra/docker-user) - your private key for authorization on virtual machines.
+
+* [infra/docker-user.pub](infra/docker-user.pub) - your publik key for authorization on virtual machines.
+
+For creating you keys, run:
+
+```
+ssh-keygen
+Generating public/private rsa key pair.
+Enter file in which to save the key (~/.ssh/id_rsa): docker-user
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
+Your identification has been saved in test.
+Your public key has been saved in docker-user.pub.
+The key's randomart image is:
++---[RSA 2048]----+
+|o+oO             |
+|.+@.o            |
+| oo*+ +          |
+|+o=. = -         |
+|*. ...+ S        |
+|o...o.. +        |
+|+. ..+o          |
+|=E..+X.          |
+|X+  .+.          |
++----[SHA256]-----+
+```
+If you will see the picture as above, everything is done correctly. Then run:
+```
+gcp_account_pass=YOUR_SUPER_PASSWORD
+cat ~/.ssh/docker-user |  openssl enc -aes-128-cbc -a -salt -pass pass:$gcp_account_pass > docker-user
+cp ~/.ssh/docker-user.pub ./infra/docker-user.pub
+```
+In commands above we are encoding created private key with your password and copying public key.
+
+* [dns_records/group_vars/all.yml](dns_records/group_vars/all.yml) - <i>domain</i>, <i>project_id</i> and <i>service_account_email</i>.
+
+* [infra/variables.tf](infra/variables.tf) - different characteristic of your future infrastructure.
+
+Be sure to replace variable `project` to your google project in Google Gloud Project.
+
+Other settings you can leave the default.
+
+Commit your changes:
+```
+git commit -m 'my commit text'
+```
+
+Now you ready to connect your project to [Gitlab](https://gitlab.com/) CI.
+
+Create new project and choose <b>Imprort Project</b> from Github.
+![Choosing project for importing](images/img-01.png)
+
+This will allow you your project in GCP. Now, follow to <b>Settings - CI/CD - Runners</b>:
+
+![Gitlab token](images/img-02.png)
+
+Please, copy token in clipboard and follow to <b>Settings - CI/CD - Environment variables</b>:
+
+![Environment variables](images/img-03.png)
+
+Here, you need to set your <b>gitlab-token</b> and previously set variable <b>gcp_account_pass</b>.
+
+In section of your project <b>CI - Pipelines - Your_Pipeline_Id</b> you will see following stages and jobs:
+
+![Project pipeline](images/img-04.png)
+
+You can run consistently all jobs <b>(without destroy!)</b> for build your infrastructure.
+
+# Сonsider the pipeline jobs in more detail
+
+## 1.1 Validate
+
+Validating terraform project. The project located in `./infra` folder
+
+## 1.2 Create
+
+Creating project in GCP. This job running in shared gitlub-runner and created infrastructure. The list of creating objects:
+```
+google_compute_firewall.loadbalancer-internal   #opening firewall for internal 
+google_compute_firewall.loadbalancer-external   #       and external services
+
+google_compute_address.swarm-mng-int            #internal static ip-addresses
+google_compute_address.swarm-wrk-int-01         #       for docker swarm cluster
+google_compute_address.swarm-wrk-int-02
+
+google_compute_address.swarm-mng-ext            #external static ip-addresses
+google_compute_address.swarm-wrk-ext-01         #       for nodes in docker
+google_compute_address.swarm-wrk-ext-02         #       swarm cluster
+
+google_storage_bucket.defaul                    # google storage bucker for saving current state of terraform objects
+
+google_compute_instance.swarm-mng               #virtual machines instances in
+google_compute_instance.swarm-wrk-01            #       google compute engine
+google_compute_instance.swarm-wrk-02
+```
+
+As a result of execution we will have configured docker swarm cluster consisting of 1 master node and 2 workers.
+
+Master node will have started and registered on your project gitlab-runner container with docker executor.
+
+## 1.3 Destroy project
+
+Destroy all your VM instances, firewall rules, and IP-addresses.
+
+## 2. DNS Records
+
+In this section ansible-playbook running in your private gitlab-runner container. It allows us to request ours external IP-address and create necessary dns-records in your Cloud DNS in GCP.
+
+## 3.1. Deploy etcd
+
+Deloying etcd cluster in your docker swarm.
 
 
-# elasticsearch
-Добавлен
-https://github.com/vvanholl/elasticsearch-prometheus-exporter
+## 3.2. Deploying Træfik
 
-ЧТО СДЕЛАНО
-изменен домен на ozyab.tk
-управление доменом изменено с route53 на google cloud DNS
+[Traefik](https://traefik.io/) - is a reverse-proxy with automatic discovery of your services.
+
+![Traefik official logo](images/img-05.png)
+
+After deploying traefik, you can open page [http://YOUR_DNS_NAME:8080/dashboard/](http://YOUR_DNS_NAME:8080/dashboard/) and see follow dashboard. While it has no information.
+
+## 3.3. Deploy application
+
+Deploying microservice application. In this project we using [demo of microservices](https://github.com/microservices-demo/microservices-demo):
+
+![Demo application main page](images/img-06.png)
+
+Page will be allow by address [https://shop.YOUR_DNS_NAME/](https://shop.YOUR_DNS_NAME/). Pay attention, besides of routing to ours demo app, traefik got the valid ssl-certificate using [Let’s Encrypt](https://letsencrypt.org/) service!
+
+## 4.1. Observability - Monitoring
+
+Deploying [Dockerd-Exporter](https://github.com/stefanprodan/caddy-builder), [Cadvisor](https://github.com/google/cadvisor), [Grafana](https://grafana.com/), [Node-Exporter](https://github.com/stefanprodan/swarmprom/tree/master/node-exporter) and [Prometheus](https://prometheus.io/).
+
+Prometheus: [https://prometheus.YOUR_DNS_NAME/](https://prometheus.YOUR_DNS_NAME/)
+
+Grafana: [https://grafana.YOUR_DNS_NAME/](https://grafana.YOUR_DNS_NAME/)
 
 
-Check zones
-https://console.cloud.google.com/net-services/dns/zones
+## 4.2. Observability - Logging
+
+Deploying [ELK](https://www.elastic.co/elk-stack) into docker swarm cluster.
+
+We using 2 Elasticsearch nodes for elastic cluster.
+
+Elasticsearch availible through Kibana service: [https://kibana.YOUR_DNS_NAME/](https://kibana.YOUR_DNS_NAME/).
+
+Elastcisearch cluster via Grafana monitoring:
+
+![Elasticsearch cluster in Grafana service](images/img-07.png)
+
+
+
+
