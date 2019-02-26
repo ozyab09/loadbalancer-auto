@@ -7,7 +7,7 @@ variable version {
 
 variable project {
   description = "Project ID"
-  default     = "keen-phalanx-223413"
+  default     = "your-docker-project"
 }
 
 variable region {

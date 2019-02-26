@@ -2,10 +2,10 @@
 ---
 # main
 
-domain: ozyab.tk
+domain: YOUR_DOMAIN
+project_id: YOUR_PROJECT
+service_account_email: YOUR_SERVICE_ACCOUNT@PROJECT_ID.iam.gserviceaccount.com
 
-project_id: keen-phalanx-223413
+#do not replace it!
 credentials_file: gcp-service-account.json
-service_account_email: dns-administrator@keen-phalanx-223413.iam.gserviceaccount.com
-
 
