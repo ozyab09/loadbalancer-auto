@@ -1,6 +1,6 @@
 # Automatic Loadbalancer
 
-This project creating infrastructure in Google Cloud Project in deploy into it Demo Application, monitoring and logging systems.
+This project creates an infrastructure in Google Cloud Project, where Demo Application, monitoring and logging systems are deployed.
 
 # Quickstart
 
@@ -12,9 +12,9 @@ This project creating infrastructure in Google Cloud Project in deploy into it D
 
 * [gcp-service-account](gcp-service-account) - your encoded JSON-file, granted of [Service accounts](https://console.cloud.google.com/iam-admin/serviceaccounts) section of Google Cloud Platform.
 
-For encode your source file `gcp-service-account.json`, run the following command:
+To encode your source file `gcp-service-account.json`, run the following command:
 
-Your JSON-file should looking like follow text:
+Your JSON-file should be looking like following text:
 ```
 {
   "type": "service_account",
@@ -39,9 +39,9 @@ Remember your password. In the future, we will need it.
 
 * [infra/docker-user](infra/docker-user) - your private key for authorization on virtual machines.
 
-* [infra/docker-user.pub](infra/docker-user.pub) - your publik key for authorization on virtual machines.
+* [infra/docker-user.pub](infra/docker-user.pub) - your public key for authorization on virtual machines.
 
-For creating you keys, run:
+For creating your keys, run:
 
 ```
 ssh-keygen
@@ -85,12 +85,13 @@ Commit your changes:
 git commit -m 'my commit text'
 ```
 
-Now you ready to connect your project to [Gitlab](https://gitlab.com/) CI.
+Now you are ready to connect your project to [Gitlab](https://gitlab.com/) CI.
 
-Create new project and choose <b>Imprort Project</b> from Github.
+Create a new project and choose <b>Imprort Project</b> from Github.
+
 ![Choosing project for importing](images/img-01.png)
 
-This will allow you your project in GCP. Now, follow to <b>Settings - CI/CD - Runners</b>:
+This will allow you you the access to your project in GCP. Now, follow to <b>Settings - CI/CD - Runners</b>:
 
 ![Gitlab token](images/img-02.png)
 
@@ -104,17 +105,17 @@ In section of your project <b>CI - Pipelines - Your_Pipeline_Id</b> you will see
 
 ![Project pipeline](images/img-04.png)
 
-You can run consistently all jobs <b>(without destroy!)</b> for build your infrastructure.
+You can consistently run all jobs <b>(without destroy!)</b> to build your infrastructure.
 
 # Сonsider the pipeline jobs in more detail
 
 ## 1.1 Validate
 
-Validating terraform project. The project located in `./infra` folder
+Validating terraform project. The project is located in `./infra` folder
 
-## 1.2 Create
+## 1.2 Creating
 
-Creating project in GCP. This job running in shared gitlub-runner and created infrastructure. The list of creating objects:
+Creating project in GCP. This job id run in shared gitlub-runner and creates infrastructure. The list of creating objects:
 ```
 google_compute_firewall.loadbalancer-internal   #opening firewall for internal 
 google_compute_firewall.loadbalancer-external   #       and external services
@@ -136,19 +137,19 @@ google_compute_instance.swarm-wrk-02
 
 As a result of execution we will have configured docker swarm cluster consisting of 1 master node and 2 workers.
 
-Master node will have started and registered on your project gitlab-runner container with docker executor.
+Master node will have been started and registered on your project as gitlab-runner container with docker executor.
 
-## 1.3 Destroy project
+## 1.3 Destroying project
 
 Destroy all your VM instances, firewall rules, and IP-addresses.
 
 ## 2. DNS Records
 
-In this section ansible-playbook running in your private gitlab-runner container. It allows us to request ours external IP-address and create necessary dns-records in your Cloud DNS in GCP.
+In this section ansible-playbook is running in your private gitlab-runner container. It allows us to request our external IP-address and create necessary dns-records in your Cloud DNS in GCP.
 
 ## 3.1. Deploy etcd
 
-Deloying etcd cluster in your docker swarm.
+Deloy etcd cluster in your docker swarm.
 
 
 ## 3.2. Deploying Træfik
@@ -157,15 +158,15 @@ Deloying etcd cluster in your docker swarm.
 
 ![Traefik official logo](images/img-05.png)
 
-After deploying traefik, you can open page [http://YOUR_DNS_NAME:8080/dashboard/](http://YOUR_DNS_NAME:8080/dashboard/) and see follow dashboard. While it has no information.
+After deploying traefik, you can open page [http://YOUR_DNS_NAME:8080/dashboard/](http://YOUR_DNS_NAME:8080/dashboard/) and see dashboard, but it has now information now.
 
-## 3.3. Deploy application
+## 3.3. Deploying application
 
-Deploying microservice application. In this project we using [demo of microservices](https://github.com/microservices-demo/microservices-demo):
+Deploying microservice application. In this project we use [demo of microservices](https://github.com/microservices-demo/microservices-demo):
 
 ![Demo application main page](images/img-06.png)
 
-Page will be allow by address [https://shop.YOUR_DNS_NAME/](https://shop.YOUR_DNS_NAME/). Pay attention, besides of routing to ours demo app, traefik got the valid ssl-certificate using [Let’s Encrypt](https://letsencrypt.org/) service!
+Page will be allowed by address [https://shop.YOUR_DNS_NAME/](https://shop.YOUR_DNS_NAME/). Pay attention, besides of routing to our demo app, traefik got the valid ssl-certificate using [Let’s Encrypt](https://letsencrypt.org/) service!
 
 ## 4.1. Observability - Monitoring
 
@@ -180,14 +181,11 @@ Grafana: [https://grafana.YOUR_DNS_NAME/](https://grafana.YOUR_DNS_NAME/)
 
 Deploying [ELK](https://www.elastic.co/elk-stack) into docker swarm cluster.
 
-We using 2 Elasticsearch nodes for elastic cluster.
+We use 2 Elasticsearch nodes for elastic cluster.
 
-Elasticsearch availible through Kibana service: [https://kibana.YOUR_DNS_NAME/](https://kibana.YOUR_DNS_NAME/).
+Elasticsearch id availible through Kibana service: [https://kibana.YOUR_DNS_NAME/](https://kibana.YOUR_DNS_NAME/).
 
 Elastcisearch cluster via Grafana monitoring:
 
 ![Elasticsearch cluster in Grafana service](images/img-07.png)
-
-
-
 
