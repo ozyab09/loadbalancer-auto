@@ -89,7 +89,7 @@ Now you are ready to connect your project to [Gitlab](https://gitlab.com/) CI.
 
 Create a new project and choose <b>Imprort Project</b> from Github.
 
-![Choosing project for importing](images/img-01.png)
+![Choosing project for importing](https://raw.githubusercontent.com/ozyab09/loadbalancer-auto/master/images/img-01.png)
 
 This will allow you you the access to your project in GCP. Now, follow to <b>Settings - CI/CD - Runners</b>:
 
